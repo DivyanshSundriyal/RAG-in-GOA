@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+:root {
+  /* Goan Design System Tokens */
+  --color-goa-green: #006B3C;
+  --color-goa-dark: #004E32;
+  --color-goa-cream: #F7F0DB;
+  --color-goa-yellow: #FFD400;
+  --color-goa-pink: #FF0B78;
+  --color-goa-light-green: #79C968;
+  --color-goa-white: #FFFDF5;
+  --color-goa-border: #003622;
+  --color-goa-card: #FAF5E8;
+
+  /* Typography */
+  --font-display: 'DM Serif Display', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Paper / Texture Shadows & Borders */
+  --shadow-paper: 4px 6px 0px #003622;
+  --shadow-paper-lg: 6px 10px 0px #002819;
+  --shadow-orb: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  background-color: #004E32;
+  color: #FFFDF5;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hardware Accelerated Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #004E32;
+}
+::-webkit-scrollbar-thumb {
+  background: #006B3C;
+  border-radius: 4px;
+  border: 1px solid #79C968;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FFD400;
+}
+
+/* Print grain texture simulation overlay */
+.paper-texture {
+  background-color: var(--color-goa-cream);
+  background-image: radial-gradient(#006B3C 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* GPU Accelerated Animations */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Dotted ring rotating animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
+  will-change: transform;
+}
+
+/* Subtle floating pulse */
+@keyframes float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float {
+  animation: float-subtle 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Section 45: Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-float,
+  .animate-pulse,
+  .animate-ping {
+    animation: none !important;
+    transition: none !important;
+  }
+}
