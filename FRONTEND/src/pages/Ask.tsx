@@ -18,14 +18,15 @@ interface AskPageProps {
   currentResponse: RagQueryResponse | null;
   historyList: RagQueryResponse[];
   isListening: boolean;
+  isTranscribing?: boolean;
   transcript: string;
   onTranscriptChange: (val: string) => void;
   volume: number;
   micDenied: boolean;
   demoMode: boolean;
   onStartListen: () => void;
-  onStopListen: () => Promise<string>;
-  onSubmitQuery: (text: string) => void;
+  onStopListen: (langCode?: string) => Promise<{ text: string; latencyMs: number }>;
+  onSubmitQuery: (text: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => void;
   onResetPipeline: () => void;
   onRestoreFromHistory: (resp: RagQueryResponse) => void;
 }
@@ -35,6 +36,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
   currentResponse,
   historyList,
   isListening,
+  isTranscribing = false,
   transcript,
   onTranscriptChange,
   volume,
@@ -45,8 +47,8 @@ export const AskPage: React.FC<AskPageProps> = memo(({
   onResetPipeline,
   onRestoreFromHistory,
 }) => {
-  const { t } = useLanguage();
-  const isBusy = pipelineState === 'TRANSCRIBING' || pipelineState === 'RETRIEVING' || pipelineState === 'GENERATING';
+  const { t, language } = useLanguage();
+  const isBusy: boolean = pipelineState === 'TRANSCRIBING' || pipelineState === 'RETRIEVING' || pipelineState === 'GENERATING' || Boolean(isTranscribing);
   const showResult = pipelineState === 'SUCCESS' && currentResponse;
   const showGuardrail = pipelineState === 'REJECTED' && currentResponse;
 
@@ -55,15 +57,15 @@ export const AskPage: React.FC<AskPageProps> = memo(({
 
   const handleSendVoiceQuery = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const sttResult = await onStopListen();
-    const queryToSend = (sttResult || transcript).trim();
+    const sttResponse = await onStopListen(language);
+    const queryToSend = (sttResponse.text || transcript).trim();
     
-    // STRICT CHECK: Never submit random fallback queries automatically if nothing was spoken/typed
+    // STRICT CHECK: Never submit empty fallback queries automatically
     if (!queryToSend) {
       return;
     }
     
-    onSubmitQuery(queryToSend);
+    onSubmitQuery(queryToSend, { isVoice: true, sttLatencyMs: sttResponse.latencyMs });
   };
 
   return (
@@ -110,7 +112,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                 {/* PROMINENT CENTERED MICROPHONE HERO ORB */}
                 <div className="flex items-center justify-center w-full my-1">
                   <VoiceOrb
-                    pipelineState={pipelineState}
+                    pipelineState={isTranscribing ? 'TRANSCRIBING' : pipelineState}
                     isListening={isListening}
                     onToggleListen={isListening ? handleSendVoiceQuery : onStartListen}
                     micDenied={micDenied}
@@ -135,10 +137,10 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                 )}
 
                 {/* Dynamic Waveform Bars */}
-                <WaveformBars pipelineState={pipelineState} volume={volume} />
+                <WaveformBars pipelineState={isTranscribing ? 'TRANSCRIBING' : pipelineState} volume={volume} />
 
                 {/* LIVE EDITABLE SPOKEN VOICE INPUT & HARDWARE MIC LEVEL MONITOR */}
-                {isListening ? (
+                {isListening || isTranscribing ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -169,7 +171,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                           type="text"
                           value={transcript}
                           onChange={(e) => onTranscriptChange(e.target.value)}
-                          placeholder="Listening... Speak now or type your query..."
+                          placeholder={isTranscribing ? "Transcribing voice via Sarvam AI saaras:v3..." : "Listening... Speak now or type your query..."}
                           className="bg-transparent font-mono text-xs sm:text-sm font-black text-[#00140B] focus:outline-none w-full placeholder-[#003622]/50"
                           autoFocus
                         />
@@ -177,14 +179,14 @@ export const AskPage: React.FC<AskPageProps> = memo(({
 
                       <button
                         type="submit"
-                        disabled={!transcript.trim()}
+                        disabled={isTranscribing}
                         className={`px-4 py-2 rounded-xl border-2 border-[#003622] font-mono text-xs font-black tracking-wider transition-all flex items-center gap-1.5 uppercase shrink-0 ${
-                          transcript.trim()
+                          transcript.trim() && !isTranscribing
                             ? 'bg-[#FF0B78] text-[#FFFDF5] shadow-[2px_3px_0px_#003622] hover:bg-[#FF0B78]/90 cursor-pointer'
                             : 'bg-[#F7F0DB] text-[#003622]/40 border-[#003622]/30 cursor-not-allowed'
                         }`}
                       >
-                        <span>SEND</span>
+                        <span>{isTranscribing ? 'STT...' : 'SEND'}</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </form>
@@ -216,7 +218,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                   </motion.div>
                 ) : (
                   /* Typed Input Fallback & Quick Suggestion Chips */
-                  <TypedInput onSubmitQuery={onSubmitQuery} isBusy={isBusy} />
+                  <TypedInput onSubmitQuery={(q) => onSubmitQuery(q, { isVoice: false })} isBusy={isBusy} />
                 )}
               </motion.div>
             ) : showGuardrail && currentResponse ? (

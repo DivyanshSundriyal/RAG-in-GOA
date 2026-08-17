@@ -38,6 +38,7 @@ export function App() {
 
   const {
     isListening,
+    isTranscribing,
     transcript,
     setTranscript,
     volume,
@@ -73,8 +74,8 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTab, isListening, startListening, stopListening, resetPipeline]);
 
-  const handleTypedSubmit = (text: string) => {
-    runPipeline(text, { isVoice: false, demoMode });
+  const handleTypedSubmit = (text: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => {
+    runPipeline(text, { isVoice: options?.isVoice ?? false, demoMode, sttLatencyMs: options?.sttLatencyMs });
   };
 
   const handleSelectHistoryItem = (resp: RagQueryResponse) => {
@@ -107,6 +108,7 @@ export function App() {
               currentResponse={currentResponse}
               historyList={historyList}
               isListening={isListening}
+              isTranscribing={isTranscribing}
               transcript={transcript}
               onTranscriptChange={setTranscript}
               volume={volume}
