@@ -14,7 +14,7 @@ export const RecentQueryCard: React.FC<RecentQueryCardProps> = memo(({ response,
   return (
     <div 
       onClick={() => onRestore(response)}
-      className="w-full bg-[#F7F0DB] border-2 border-[#003622] rounded-2xl p-4 shadow-[4px_4px_0px_#003622] text-[#001D11] hover:translate-y-[-2px] transition-all cursor-pointer group gpu-layer"
+      className="hidden lg:block w-full bg-[#F7F0DB] border-2 border-[#003622] rounded-2xl p-4 shadow-[4px_4px_0px_#003622] text-[#001D11] hover:translate-y-[-2px] transition-all cursor-pointer group gpu-layer"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-1.5 font-mono text-[10px] font-black text-[#003622] uppercase">

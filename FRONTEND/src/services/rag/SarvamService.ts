@@ -184,7 +184,7 @@ export class SarvamService {
               target_language_code: langCode,
               speaker: 'anushka', // Upgraded to supported speaker in bulbul:v2
               pitch: 0,
-              pace: 1.05,
+              pace: 0.85,
               loudness: 1.5,
               speech_sample_rate: 22050,
               enable_preprocessing: true,
@@ -212,7 +212,7 @@ export class SarvamService {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
+      utterance.rate = 0.85;
       utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
       return true;

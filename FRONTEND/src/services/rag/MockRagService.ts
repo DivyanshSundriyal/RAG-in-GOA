@@ -20,24 +20,24 @@ export class MockRagService implements RagService {
     const speedFactor = isDemo ? 0.3 : 1.0;
 
     const cleanInput = input.trim().toLowerCase();
-    let baseResponse: RagQueryResponse;
+    let matchedResponse: RagQueryResponse | undefined;
 
-    if (cleanInput.includes('password') || cleanInput.includes('secret') || cleanInput.includes('bank')) {
-      baseResponse = MOCK_RESPONSES.unsafe_query;
-    } else if (cleanInput.includes('fifa') || cleanInput.includes('world cup') || cleanInput.includes('football')) {
-      baseResponse = MOCK_RESPONSES.off_topic;
-    } else if (cleanInput.includes('quantum') || cleanInput.includes('2040')) {
-      baseResponse = MOCK_RESPONSES.no_context;
+    if (cleanInput.includes('finding') || cleanInput.includes('main')) {
+      matchedResponse = MOCK_RESPONSES.main_findings;
     } else if (cleanInput.includes('summar') || cleanInput.includes('relevant')) {
-      baseResponse = MOCK_RESPONSES.summarize;
+      matchedResponse = MOCK_RESPONSES.summarize;
     } else if (cleanInput.includes('key') || cleanInput.includes('insight')) {
-      baseResponse = MOCK_RESPONSES.key_insights;
+      matchedResponse = MOCK_RESPONSES.key_insights;
     } else if (cleanInput.includes('compare') || cleanInput.includes('related')) {
-      baseResponse = MOCK_RESPONSES.compare_docs;
-    } else if (cleanInput.includes('finding') || cleanInput.includes('main')) {
-      baseResponse = MOCK_RESPONSES.main_findings;
+      matchedResponse = MOCK_RESPONSES.compare_docs;
+    } else if (cleanInput.includes('password') || cleanInput.includes('secret') || cleanInput.includes('bank')) {
+      matchedResponse = MOCK_RESPONSES.unsafe_query;
+    } else if (cleanInput.includes('fifa') || cleanInput.includes('world cup') || cleanInput.includes('football')) {
+      matchedResponse = MOCK_RESPONSES.off_topic;
+    } else if (cleanInput.includes('quantum') || cleanInput.includes('2040')) {
+      matchedResponse = MOCK_RESPONSES.no_context;
     } else {
-      baseResponse = {
+      matchedResponse = {
         id: `query_${Date.now()}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         query: input,
@@ -90,18 +90,6 @@ export class MockRagService implements RagService {
       };
     }
 
-    // Always preserve exact user spoken transcription input
-    const matchedResponse: RagQueryResponse = {
-      ...baseResponse,
-      id: `query_${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      query: input.trim(),
-      transcription: {
-        ...baseResponse.transcription,
-        text: input.trim(),
-      },
-    };
-
     await this.delay(100 * speedFactor);
     return matchedResponse;
   }
@@ -127,7 +115,7 @@ export class MockRagService implements RagService {
   async generate(_queryText: string, _contextChunks: unknown[]): Promise<{ answer: string; grounded: boolean; durationMs: number }> {
     await this.delay(600);
     return {
-      answer: `Grounded response for "${_queryText}"...`,
+      answer: "The retrieved documents indicate sub-200ms voice RAG pipeline execution...",
       grounded: true,
       durationMs: 74
     };

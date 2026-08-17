@@ -33,14 +33,12 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
   ];
 
   return (
-    <div className={`w-full max-w-xl mx-auto flex flex-col items-center space-y-2 transition-all duration-300 ${
-      showGuardrails ? '-mt-6 sm:-mt-10 mb-1' : '-mt-2 sm:-mt-4 mb-2'
-    }`}>
+    <div className="w-full max-w-xl mx-auto flex flex-col items-center space-y-1 mt-0 mb-1 transition-all duration-300">
       {/* OR Separator */}
-      <div className="flex items-center space-x-3 w-full justify-center text-[#F7F0DB] font-mono text-[11px] tracking-widest font-bold drop-shadow-sm">
-        <div className="h-[1px] bg-[#79C968]/60 flex-1 max-w-[60px]" />
+      <div className="flex items-center space-x-3 w-full justify-center text-[#F7F0DB] font-mono text-[10px] tracking-widest font-bold drop-shadow-sm my-0.5">
+        <div className="h-[1px] bg-[#79C968]/60 flex-1 max-w-[50px]" />
         <span>{t('orSeparator')}</span>
-        <div className="h-[1px] bg-[#79C968]/60 flex-1 max-w-[60px]" />
+        <div className="h-[1px] bg-[#79C968]/60 flex-1 max-w-[50px]" />
       </div>
 
       {/* Typed Input Container Pill */}
@@ -54,13 +52,13 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
           onChange={(e) => setInputText(e.target.value)}
           placeholder={t('typePlaceholder')}
           disabled={isBusy}
-          className="flex-1 px-4 py-1.5 bg-transparent text-[#004E32] font-sans font-bold text-xs sm:text-sm placeholder-[#004E32]/60 focus:outline-none"
+          className="flex-1 px-4 py-1.5 bg-transparent text-[#004E32] font-sans font-bold text-sm sm:text-base placeholder-[#004E32]/60 focus:outline-none min-h-[40px]"
         />
         <button
           type="submit"
           disabled={!inputText.trim() || isBusy}
           aria-label="Submit query"
-          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 border-[#003622] transition-all cursor-pointer ${
+          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 border-[#003622] transition-all cursor-pointer touch-manipulation active:scale-95 shrink-0 ${
             inputText.trim() && !isBusy
               ? 'bg-[#006B3C] text-[#FFD400] shadow-[2px_2px_0px_#003622] hover:bg-[#004E32]'
               : 'bg-[#F7F0DB] text-[#004E32]/30 border-transparent cursor-not-allowed'
@@ -70,10 +68,10 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
         </button>
       </form>
 
-      {/* Suggestion Chips Section */}
-      <div className="w-full flex flex-col items-center space-y-1.5">
+      {/* Suggestion Chips Section - Clear Vertical Spacing & High Visibility */}
+      <div className="w-full flex flex-col items-center space-y-1 pt-0.5 px-1 sm:px-0">
         <div className="flex items-center justify-between w-full px-2">
-          <span className="font-mono text-[11px] font-black tracking-widest text-[#FFD400] uppercase flex items-center gap-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          <span className="font-mono text-[10px] font-black tracking-widest text-[#FFD400] uppercase flex items-center gap-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             <Sparkles className="w-3.5 h-3.5 text-[#FFD400]" />
             {t('tryThese')}
           </span>
@@ -81,9 +79,9 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
           <button
             type="button"
             onClick={() => setShowGuardrails(!showGuardrails)}
-            className="font-mono text-[10px] font-black text-[#FF0B78] underline cursor-pointer hover:text-[#FFD400] flex items-center gap-1 drop-shadow-sm"
+            className="font-mono text-[10px] font-black text-[#FFFDF5] bg-[#FF0B78] border border-[#003622] px-2 py-0.5 rounded-lg shadow-[1px_2px_0px_#003622] cursor-pointer hover:bg-[#FF0B78]/90 flex items-center gap-1 touch-manipulation min-h-[26px]"
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
+            <ShieldAlert className="w-3 h-3 text-[#FFFDF5]" />
             {showGuardrails ? t('hideGuardrails') : t('testGuardrails')}
           </button>
         </div>
@@ -95,7 +93,7 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
               key={chip.id}
               onClick={() => handleChipClick(chip.query)}
               disabled={isBusy}
-              className="px-3 py-1 rounded-xl bg-[#005735] border-2 border-[#79C968] hover:border-[#FFD400] text-[#FFFDF5] hover:text-[#FFD400] font-mono text-[11px] font-black tracking-wider transition-all shadow-[2px_3px_0px_#003622] hover:translate-y-[-1px] active:translate-y-[0px] cursor-pointer uppercase"
+              className="px-3 py-1 rounded-xl bg-[#005735] border-2 border-[#79C968] hover:border-[#FFD400] text-[#FFFDF5] hover:text-[#FFD400] font-mono text-[10px] sm:text-[11px] font-black tracking-wider transition-all shadow-[2px_3px_0px_#003622] hover:translate-y-[-1px] active:scale-95 cursor-pointer uppercase touch-manipulation min-h-[34px]"
             >
               {chip.label}
             </button>
@@ -104,8 +102,8 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
 
         {/* Optional Guardrail Demo Trigger Chips - High-Visibility Positioned Higher */}
         {showGuardrails && (
-          <div className="flex flex-wrap items-center justify-center gap-1.5 w-full pt-2 border-t border-[#79C968]/50 mt-1 animate-fadeIn">
-            <span className="font-mono text-[11px] font-black text-[#FFD400] uppercase w-full text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] tracking-widest">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 w-full pt-1.5 border-t border-[#79C968]/50 mt-1 animate-fadeIn">
+            <span className="font-mono text-[10px] font-black text-[#FFD400] uppercase w-full text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] tracking-widest">
               DEMO SAFETY POLICY TRIPS:
             </span>
             {DEMO_GUARDRAIL_CHIPS.map((chip) => (
@@ -113,7 +111,7 @@ export const TypedInput: React.FC<TypedInputProps> = memo(({ onSubmitQuery, isBu
                 key={chip.id}
                 onClick={() => handleChipClick(chip.query)}
                 disabled={isBusy}
-                className="px-3 py-1 rounded-xl bg-[#FF0B78] text-[#FFFDF5] border-2 border-[#003622] font-mono text-[11px] font-black uppercase tracking-wider transition-all shadow-[2px_3px_0px_#003622] hover:bg-[#FF0B78]/90 hover:scale-105 cursor-pointer"
+                className="px-3 py-1 rounded-xl bg-[#FF0B78] text-[#FFFDF5] border-2 border-[#003622] font-mono text-[10px] sm:text-[11px] font-black uppercase tracking-wider transition-all shadow-[2px_3px_0px_#003622] hover:bg-[#FF0B78]/90 active:scale-95 cursor-pointer touch-manipulation min-h-[34px]"
               >
                 {chip.label}
               </button>

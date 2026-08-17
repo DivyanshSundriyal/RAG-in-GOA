@@ -51,23 +51,23 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = memo(({
   const isBusy = pipelineState === 'TRANSCRIBING' || pipelineState === 'RETRIEVING' || pipelineState === 'GENERATING';
 
   return (
-    <div className="flex flex-col items-center justify-center my-1 sm:my-2 relative select-none gpu-layer">
+    <div className="flex flex-col items-center justify-center my-1 sm:my-2 relative select-none transform-gpu">
       {/* Outer Rotating Dotted Pink Ring */}
-      <div className="relative flex items-center justify-center p-3 sm:p-4">
+      <div className="relative flex items-center justify-center p-2 sm:p-4">
         <div 
           className={`absolute inset-0 rounded-full border-4 border-dashed border-[#FF0B78] ${
             isListening ? 'animate-spin-slow scale-110 border-[#FF0B78]' : 'scale-100 opacity-60 border-[#FF0B78]/40'
-          } transition-all duration-700 pointer-events-none`}
+          } transition-all duration-700 pointer-events-none transform-gpu`}
         />
 
         {/* Outer Cream Sticker Ring Container - ENLARGED MIC CIRCLE */}
         <motion.button
           whileHover={{ scale: isBusy ? 1 : 1.04 }}
-          whileTap={{ scale: isBusy ? 1 : 0.96 }}
+          whileTap={{ scale: isBusy ? 1 : 0.95 }}
           onClick={onToggleListen}
           disabled={isBusy}
           aria-label={stateDetails.label}
-          className={`w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-[#F7F0DB] border-4 border-[#003622] p-3.5 flex items-center justify-center relative shadow-[6px_8px_0px_#003622] transition-shadow ${
+          className={`w-38 h-38 sm:w-56 sm:h-56 rounded-full bg-[#F7F0DB] border-4 border-[#003622] p-3 sm:p-3.5 flex items-center justify-center relative shadow-[5px_7px_0px_#003622] sm:shadow-[6px_8px_0px_#003622] transition-all touch-manipulation cursor-pointer ${
             isListening ? 'shadow-[8px_12px_28px_rgba(255,11,120,0.4)]' : ''
           }`}
         >
@@ -89,7 +89,7 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = memo(({
               className="z-10 flex flex-col items-center justify-center text-[#F7F0DB]"
             >
               <IconComponent 
-                className={`w-14 h-14 sm:w-20 sm:h-20 ${stateDetails.spin ? 'animate-spin text-[#FFD400]' : 'text-[#F7F0DB]'}`} 
+                className={`w-12 h-12 sm:w-20 sm:h-20 ${stateDetails.spin ? 'animate-spin text-[#FFD400]' : 'text-[#F7F0DB]'}`} 
               />
             </motion.div>
 
@@ -110,7 +110,7 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = memo(({
         whileTap={{ scale: 0.95 }}
         onClick={onToggleListen}
         disabled={isBusy}
-        className={`-mt-4 z-20 px-5 py-1.5 rounded-full border-2 border-[#003622] font-mono text-xs font-black tracking-widest text-[#003622] shadow-[2px_3px_0px_#003622] flex items-center gap-2 uppercase ${stateDetails.color} transition-colors cursor-pointer`}
+        className={`-mt-4 z-20 px-4 sm:px-5 py-1.5 rounded-full border-2 border-[#003622] font-mono text-[11px] sm:text-xs font-black tracking-widest text-[#003622] shadow-[2px_3px_0px_#003622] flex items-center gap-2 uppercase ${stateDetails.color} transition-colors cursor-pointer touch-manipulation min-h-[36px]`}
       >
         <span className="w-2 h-2 rounded-full bg-[#003622] animate-ping" />
         <span>{stateDetails.label}</span>

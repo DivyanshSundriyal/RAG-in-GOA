@@ -29,13 +29,13 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
   });
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 pb-24 lg:pb-8">
       {/* Header Title */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b-2 border-[#006B3C]">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b-2 border-[#006B3C]">
         <div>
           <div className="flex items-center space-x-2">
-            <HistoryIcon className="w-8 h-8 text-[#FFD400]" />
-            <h1 className="font-display text-3xl sm:text-5xl font-black text-[#FFD400]">
+            <HistoryIcon className="w-7 h-7 sm:w-8 sm:h-8 text-[#FFD400]" />
+            <h1 className="font-display text-2xl sm:text-5xl font-black text-[#FFD400]">
               {t('historyTitle')}
             </h1>
           </div>
@@ -45,10 +45,10 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center space-x-2 bg-[#006B3C] p-1.5 rounded-2xl border border-[#79C968]/40">
+        <div className="flex items-center space-x-1.5 sm:space-x-2 bg-[#006B3C] p-1.5 rounded-2xl border border-[#79C968]/40 overflow-x-auto max-w-full">
           <button
             onClick={() => setFilterStatus('all')}
-            className={`px-3 py-1 rounded-xl font-mono text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all min-h-[36px] cursor-pointer touch-manipulation active:scale-95 shrink-0 ${
               filterStatus === 'all' ? 'bg-[#FFD400] text-[#004E32]' : 'text-[#F7F0DB] hover:text-[#FFD400]'
             }`}
           >
@@ -56,7 +56,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
           </button>
           <button
             onClick={() => setFilterStatus('grounded')}
-            className={`px-3 py-1 rounded-xl font-mono text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all min-h-[36px] cursor-pointer touch-manipulation active:scale-95 shrink-0 ${
               filterStatus === 'grounded' ? 'bg-[#79C968] text-[#004E32]' : 'text-[#F7F0DB] hover:text-[#79C968]'
             }`}
           >
@@ -64,7 +64,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
           </button>
           <button
             onClick={() => setFilterStatus('rejected')}
-            className={`px-3 py-1 rounded-xl font-mono text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all min-h-[36px] cursor-pointer touch-manipulation active:scale-95 shrink-0 ${
               filterStatus === 'rejected' ? 'bg-[#FF0B78] text-[#FFFDF5]' : 'text-[#F7F0DB] hover:text-[#FF0B78]'
             }`}
           >
@@ -82,7 +82,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-12 pr-4 py-2 bg-transparent font-sans text-sm text-[#004E32] placeholder-[#004E32]/50 focus:outline-none"
+            className="w-full pl-12 pr-4 py-2.5 bg-transparent font-sans font-bold text-sm sm:text-base text-[#004E32] placeholder-[#004E32]/50 focus:outline-none min-h-[44px]"
           />
         </div>
       </div>
@@ -95,7 +95,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
             <div
               key={item.id}
               onClick={() => onSelectQuery(item)}
-              className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-5 shadow-[4px_6px_0px_#003622] text-[#004E32] hover:translate-y-[-3px] transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-4 sm:p-5 shadow-[4px_6px_0px_#003622] text-[#004E32] hover:translate-y-[-3px] active:scale-[0.99] transition-all cursor-pointer flex flex-col justify-between group touch-manipulation"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -122,7 +122,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
                   </div>
                 </div>
 
-                <h3 className="font-display text-lg font-bold text-[#004E32] group-hover:text-[#FF0B78] transition-colors mb-2">
+                <h3 className="font-display text-base sm:text-lg font-bold text-[#004E32] group-hover:text-[#FF0B78] transition-colors mb-2">
                   “{item.query}”
                 </h3>
 

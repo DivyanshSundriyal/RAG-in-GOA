@@ -12,6 +12,13 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const defaultFallback: LanguageContextType = {
+  language: 'en',
+  setLanguage: () => {},
+  t: (key: string) => TRANSLATIONS.en[key] || key,
+  translateWithSarvam: async (text: string) => text,
+};
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<SupportedLanguage>(() => {
     const saved = localStorage.getItem('hh_goa_lang') as SupportedLanguage;
@@ -54,8 +61,5 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
 export function useLanguage(): LanguageContextType {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
+  return context || defaultFallback;
 }

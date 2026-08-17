@@ -22,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, onSelectTab })
   return (
     <>
       {/* Desktop Editorial Side Rail */}
-      <aside className="hidden lg:flex flex-col w-64 border-r border-[#006B3C]/50 bg-[#004E32]/95 h-[calc(100vh-65px)] p-6 justify-between relative z-30 shrink-0">
+      <aside className="hidden lg:flex flex-col w-64 border-r border-[#006B3C]/50 bg-[#004E32]/95 h-[calc(100vh-65px)] p-6 justify-between relative z-30 shrink-0 select-none">
         <div className="flex flex-col space-y-6">
           {/* Navigation Title */}
           <div>
@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, onSelectTab })
                   <button
                     key={item.id}
                     onClick={() => onSelectTab(item.id)}
-                    className={`flex items-center space-x-2.5 px-3.5 py-3 rounded-xl font-mono text-sm font-bold tracking-wider transition-all text-left ${
+                    className={`flex items-center space-x-2.5 px-3.5 py-3 rounded-xl font-mono text-sm font-bold tracking-wider transition-all text-left cursor-pointer active:scale-95 ${
                       isActive
                         ? 'bg-[#FFD400] text-[#004E32] shadow-[3px_4px_0px_#003622] border-2 border-[#003622] translate-x-1'
                         : 'text-[#F7F0DB] hover:bg-[#006B3C]/60 hover:text-[#FFD400]'
@@ -115,8 +115,8 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, onSelectTab })
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#004E32] border-t-2 border-[#006B3C] py-2 px-4 flex justify-around items-center z-50 shadow-2xl">
+      {/* Mobile Android Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#004E32]/98 backdrop-blur-md border-t-2 border-[#006B3C] py-2 px-2 flex justify-around items-center z-50 shadow-2xl touch-manipulation pb-[calc(env(safe-area-inset-bottom,8px)+6px)]">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -125,14 +125,14 @@ export const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, onSelectTab })
             <button
               key={item.id}
               onClick={() => onSelectTab(item.id)}
-              className={`flex flex-col items-center py-1 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center py-1.5 px-3 rounded-xl transition-all min-h-[48px] min-w-[64px] justify-center cursor-pointer active:scale-95 touch-manipulation ${
                 isActive
-                  ? 'text-[#FFD400] font-bold scale-105'
+                  ? 'bg-[#006B3C] text-[#FFD400] font-bold border border-[#79C968]/50 shadow-[2px_2px_0px_#003622]'
                   : 'text-[#F7F0DB]/70 hover:text-[#F7F0DB]'
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'text-[#FFD400]' : 'text-[#79C968]'}`} />
-              <span className="font-mono text-[10px] tracking-wider uppercase mt-1">
+              <span className="font-mono text-[9px] sm:text-[10px] tracking-wider uppercase mt-1">
                 {label}
               </span>
             </button>

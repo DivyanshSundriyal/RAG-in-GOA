@@ -95,13 +95,13 @@ export function App() {
         onNavigateSystem={() => setActiveTab('system')}
       />
 
-      {/* Application Body Layout */}
-      <div className="flex-1 flex relative overflow-hidden">
+      {/* Application Body Layout - Starts 100% Below Header */}
+      <div className="flex-1 flex relative overflow-hidden h-[calc(100vh-60px)]">
         {/* Navigation Sidebar with Embedded Footer Panel */}
         <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
 
         {/* Dynamic Page Views Container */}
-        <main className="flex-1 h-[calc(100vh-65px)] overflow-y-auto relative">
+        <main className="flex-1 h-full overflow-y-auto relative">
           {activeTab === 'ask' && (
             <AskPage
               pipelineState={pipelineState}

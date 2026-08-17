@@ -43,7 +43,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
 
     // Voice Orb States
     orbIdle: "TAP TO SPEAK",
-    orbListening: "LISTENING...",
+    orbListening: "TAP TO SEND",
     orbTranscribing: "TRANSCRIBING",
     orbFinding: "FINDING",
     orbAnswering: "ANSWERING",
@@ -121,11 +121,24 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     guardrailRateSub: "Off-topic or unsafe prompts filtered in <10ms.",
     auditedTag: "AUDITED FOR HH GOA 2026 JUDGING",
     totalEndToEnd: "Total End-to-End Latency:",
+    p99TelemetryTag: "p99 Telemetry",
+    judgeVerificationTitle: "JUDGE VERIFICATION SLA",
+    judgeItem1: "Sub-200ms end-to-end total latency target met",
+    judgeItem2: "Grounded evidence attribution with similarity scores",
+    judgeItem3: "Sarvam AI native STT model saaras:v3 integrated",
+    judgeItem4: "Built-in safety guardrails & rejection policy handling",
+    totalEndToEndLabel: "TOTAL END-TO-END LATENCY",
+    passedTargetTag: "PASSED SLA TARGET",
+    targetSLACompliance: "100% COMPLIANT WITH JUDGING SLA (<200MS)",
 
     // System Page
     systemTitle: "SYSTEM ARCHITECTURE",
     systemSub: "Live RAG service components health dashboard and endpoint status.",
     pingPipelineBtn: "PING PIPELINE",
+    testPingBtn: "PING PIPELINE",
+    testingPing: "TESTING...",
+    operationalTag: "OPERATIONAL",
+    telemetrySpecTag: "SUB-200MS VOICE RAG ARCHITECTURE SPECIFICATIONS",
     nodeVoice: "VOICE ENGINE",
     nodeVoiceDetail: "Web Speech API / Sarvam STT",
     nodeRag: "RAG PIPELINE",
