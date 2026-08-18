@@ -52,6 +52,12 @@ export const VoiceOrb: React.FC<VoiceOrbProps> = memo(({
 
   return (
     <div className="flex flex-col items-center justify-center my-1 sm:my-2 relative select-none transform-gpu">
+      {/* KHOJO VOICE RAG Name Badge Directly Above Mic */}
+      <div className="z-20 -mb-2 bg-[#FFD400] text-[#003622] font-mono text-[10px] sm:text-xs font-black px-3 py-0.5 sm:px-3.5 sm:py-1 rounded-full border-2 border-[#003622] shadow-[2px_2px_0px_#003622] uppercase tracking-widest flex items-center gap-1.5 shrink-0">
+        <Sparkles className="w-3 h-3 text-[#FF0B78]" />
+        <span>KHOJO VOICE RAG</span>
+      </div>
+
       {/* Outer Rotating Dotted Pink Ring */}
       <div className="relative flex items-center justify-center p-2 sm:p-4">
         <div 

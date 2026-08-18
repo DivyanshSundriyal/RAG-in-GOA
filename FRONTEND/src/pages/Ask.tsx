@@ -12,6 +12,8 @@ import { GuardrailBanner } from '../components/guardrails/GuardrailBanner';
 import type { PipelineState, RagQueryResponse } from '../types/rag';
 import { getLocalizedMockResponses } from '../data/mockQueries';
 import { useLanguage } from '../context/LanguageContext';
+import type { SupportedLanguage } from '../data/translations';
+import { detectLanguageFromScript } from '../services/rag/SarvamService';
 
 interface AskPageProps {
   pipelineState: PipelineState;
@@ -25,7 +27,7 @@ interface AskPageProps {
   micDenied: boolean;
   demoMode: boolean;
   onStartListen: () => void;
-  onStopListen: (langCode?: string) => Promise<{ text: string; latencyMs: number }>;
+  onStopListen: (langCode?: string) => Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }>;
   onSubmitQuery: (text: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => void;
   onResetPipeline: () => void;
   onRestoreFromHistory: (resp: RagQueryResponse) => void;
@@ -47,7 +49,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
   onResetPipeline,
   onRestoreFromHistory,
 }) => {
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const isBusy: boolean = pipelineState === 'TRANSCRIBING' || pipelineState === 'RETRIEVING' || pipelineState === 'GENERATING' || Boolean(isTranscribing);
   const showResult = pipelineState === 'SUCCESS' && currentResponse;
   const showGuardrail = pipelineState === 'REJECTED' && currentResponse;
@@ -57,7 +59,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
 
   const handleSendVoiceQuery = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const sttResponse = await onStopListen(language);
+    const sttResponse = await onStopListen('unknown');
     const queryToSend = (sttResponse.text || transcript).trim();
     
     // STRICT CHECK: Never submit empty fallback queries automatically
@@ -65,7 +67,20 @@ export const AskPage: React.FC<AskPageProps> = memo(({
       return;
     }
     
+    const detected = sttResponse.detectedLanguage || detectLanguageFromScript(queryToSend);
+    if (detected && detected !== language) {
+      setLanguage(detected);
+    }
+
     onSubmitQuery(queryToSend, { isVoice: true, sttLatencyMs: sttResponse.latencyMs });
+  };
+
+  const handleTypedSubmitWithAutoLang = (queryText: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => {
+    const detected = detectLanguageFromScript(queryText);
+    if (detected && detected !== language) {
+      setLanguage(detected);
+    }
+    onSubmitQuery(queryText, options);
   };
 
   return (
@@ -218,7 +233,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                   </motion.div>
                 ) : (
                   /* Typed Input Fallback & Quick Suggestion Chips */
-                  <TypedInput onSubmitQuery={(q) => onSubmitQuery(q, { isVoice: false })} isBusy={isBusy} />
+                  <TypedInput onSubmitQuery={(q) => handleTypedSubmitWithAutoLang(q, { isVoice: false })} isBusy={isBusy} />
                 )}
               </motion.div>
             ) : showGuardrail && currentResponse ? (

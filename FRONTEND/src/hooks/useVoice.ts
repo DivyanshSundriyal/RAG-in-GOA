@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { sarvamService } from '../services/rag/SarvamService';
+import { sarvamService, detectLanguageFromScript } from '../services/rag/SarvamService';
 import { encodeWAV } from '../utils/wavEncoder';
+import type { SupportedLanguage } from '../data/translations';
 
 interface UseVoiceReturn {
   isListening: boolean;
@@ -10,7 +11,7 @@ interface UseVoiceReturn {
   volume: number;
   micPermissionDenied: boolean;
   startListening: () => void;
-  stopListening: (langCode?: string) => Promise<{ text: string; latencyMs: number }>;
+  stopListening: (langCode?: string) => Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }>;
   resetTranscript: () => void;
   speakAnswer: (text: string) => void;
 }
@@ -95,7 +96,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       setMicPermissionDenied(false);
 
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: 16000, // 16kHz native rate for Sarvam AI models
+        sampleRate: 16000,
       });
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 64;
@@ -105,7 +106,6 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       audioContextRef.current = audioCtx;
       analyserRef.current = analyser;
 
-      // 16kHz mono PCM sample collector
       pcmSamplesRef.current = [];
       const scriptNode = audioCtx.createScriptProcessor(4096, 1, 1);
       scriptNode.onaudioprocess = (e) => {
@@ -117,7 +117,6 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       scriptNode.connect(audioCtx.destination);
       scriptNodeRef.current = scriptNode;
 
-      // Dynamic Volume Meter
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const updateVolume = () => {
         if (!analyserRef.current) return;
@@ -129,7 +128,6 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       };
       updateVolume();
 
-      // Parallel MediaRecorder backup stream
       try {
         audioChunksRef.current = [];
         let mimeType = 'audio/webm';
@@ -196,10 +194,8 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
     }
   }, [startVolumeAnalyzer]);
 
-  // Promise-based asynchronous audio capture flush sequence
   const stopAudioCapture = useCallback((): Promise<Blob | null> => {
     return new Promise((resolve) => {
-      // 1. Process 16kHz PCM samples first
       if (pcmSamplesRef.current.length > 0) {
         let totalLen = 0;
         for (const chunk of pcmSamplesRef.current) totalLen += chunk.length;
@@ -210,14 +206,12 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
           offset += chunk.length;
         }
 
-        if (merged.length > 1600) { // > 0.1 sec of audio
+        if (merged.length > 1600) {
           const wavBlob = encodeWAV(merged, 16000);
-          console.log(`🎙️ Encoded 16kHz PCM Mono WAV Blob. Size: ${wavBlob.size} bytes (${(merged.length / 16000).toFixed(2)}s)`);
           return resolve(wavBlob);
         }
       }
 
-      // 2. Fallback to MediaRecorder async flush
       const recorder = mediaRecorderRef.current;
       if (recorder && recorder.state !== 'inactive') {
         recorder.onstop = () => {
@@ -238,7 +232,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
     });
   }, []);
 
-  const stopListening = useCallback(async (langCode: string = 'unknown'): Promise<{ text: string; latencyMs: number }> => {
+  const stopListening = useCallback(async (langCode: string = 'unknown'): Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }> => {
     setIsListening(false);
     listeningActiveRef.current = false;
 
@@ -253,9 +247,9 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
     setIsTranscribing(true);
     let finalResult = transcript.trim();
     let sttLatencyMs = 0;
+    let detectedLang: SupportedLanguage | undefined = detectLanguageFromScript(finalResult);
 
     try {
-      // Asynchronously flush audio buffers
       const audioBlob = await stopAudioCapture();
       stopVolumeAnalyzer();
 
@@ -265,6 +259,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
           finalResult = sttResponse.text.trim();
           setTranscript(finalResult);
           sttLatencyMs = sttResponse.latencyMs;
+          detectedLang = sttResponse.detectedLanguage || detectLanguageFromScript(finalResult);
         }
       }
     } catch (e) {
@@ -274,7 +269,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       setIsTranscribing(false);
     }
 
-    return { text: finalResult, latencyMs: sttLatencyMs };
+    return { text: finalResult, latencyMs: sttLatencyMs, detectedLanguage: detectedLang };
   }, [stopVolumeAnalyzer, stopAudioCapture, transcript]);
 
   const resetTranscript = useCallback(() => {

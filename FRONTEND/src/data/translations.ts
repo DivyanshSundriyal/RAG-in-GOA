@@ -42,8 +42,8 @@ export const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
     askHeroSub: "Speak naturally. Get answers grounded in retrieved context with sub-200ms telemetry.",
 
     // Voice Orb States
-    orbIdle: "TAP TO SPEAK",
-    orbListening: "TAP TO SEND",
+    orbIdle: "TAP TO SPEAK IN ANY LANGUAGE",
+    orbListening: "STOP RECORDER",
     orbTranscribing: "TRANSCRIBING",
     orbFinding: "FINDING",
     orbAnswering: "ANSWERING",

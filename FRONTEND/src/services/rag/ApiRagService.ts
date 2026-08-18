@@ -1,5 +1,6 @@
 import type { RagService } from './RagService';
 import type { RagQueryResponse } from '../../types/rag';
+import { sarvamService, detectLanguageFromScript } from './SarvamService';
 
 export class ApiRagService implements RagService {
   private baseUrl: string;
@@ -9,13 +10,35 @@ export class ApiRagService implements RagService {
   }
 
   async query(input: string, options?: { isVoice?: boolean; demoMode?: boolean }): Promise<RagQueryResponse> {
+    const rawQuery = input.trim();
+    const detectedLang = detectLanguageFromScript(rawQuery);
+
+    // DUAL-TRANSLATION PIPELINE STEP 1: Translate non-English query to English for Vector Database Search
+    let englishQuery = rawQuery;
+    if (detectedLang !== 'en' && sarvamService.hasApiKey) {
+      const translated = await sarvamService.translateText(rawQuery, 'en-IN', detectedLang);
+      if (translated?.trim()) {
+        englishQuery = translated.trim();
+      }
+    }
+
+    // Inspectable Developer Console Log for Judging & Verification
+    console.log(
+      `🌐 [MULTILINGUAL DUAL-TRANSLATION RAG PIPELINE]\n` +
+      ` ├─ 🎙️ Raw Spoken User Query (${detectedLang.toUpperCase()}) : "${rawQuery}"\n` +
+      ` ├─ 🔀 Translated for Vector Search (EN) : "${englishQuery}"\n` +
+      ` └─ 🚀 Payload Sent to RAG Backend API   : { query: "${englishQuery}", rawUserQuery: "${rawQuery}", detectedLanguage: "${detectedLang}" }`
+    );
+
     const response = await fetch(`${this.baseUrl}/rag/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: input,
+        query: englishQuery,
+        rawUserQuery: rawQuery,
+        detectedLanguage: detectedLang,
         sessionId: `session_${Date.now()}`,
         isVoice: options?.isVoice || false,
         demoMode: options?.demoMode || false,
@@ -26,7 +49,11 @@ export class ApiRagService implements RagService {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
-    return await response.json();
+    const ragResult: RagQueryResponse = await response.json();
+
+    // Ensure raw query is preserved on UI display card
+    ragResult.query = rawQuery;
+    return ragResult;
   }
 
   async transcribe(audioBlob?: Blob | string): Promise<{ text: string; confidence: number; durationMs: number }> {
