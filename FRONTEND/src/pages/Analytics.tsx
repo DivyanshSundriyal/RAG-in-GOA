@@ -20,7 +20,7 @@ export const AnalyticsPage: React.FC = memo(() => {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 pb-20 lg:pb-4 min-h-[calc(100vh-65px)] lg:h-[calc(100vh-80px)] flex flex-col justify-start overflow-y-auto lg:overflow-hidden relative z-10 select-none space-y-2.5">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-20 lg:pb-4 min-h-[calc(100vh-65px)] lg:h-[calc(100vh-80px)] flex flex-col justify-start overflow-y-auto lg:overflow-hidden relative z-10 select-none space-y-3">
       {/* Header */}
       <div className="flex items-center space-x-3 pb-2 border-b-2 border-[#006B3C] shrink-0 pt-1 sm:pt-0">
         <BarChart3 className="w-7 h-7 text-[#FFD400]" />
@@ -35,11 +35,11 @@ export const AnalyticsPage: React.FC = memo(() => {
       </div>
 
       {/* Top 4 Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 shrink-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
         {metrics.map((item) => (
           <div
             key={item.label}
-            className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-3 sm:p-3.5 shadow-[3px_4px_0px_#003622] text-[#001D11] flex flex-col justify-between"
+            className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-3.5 shadow-[3px_4px_0px_#003622] text-[#001D11] flex flex-col justify-between"
           >
             <span className="font-mono text-[10px] font-black tracking-wider text-[#003622] uppercase">
               {item.label}
@@ -56,8 +56,8 @@ export const AnalyticsPage: React.FC = memo(() => {
         ))}
       </div>
 
-      {/* Latency Allocation Breakdown & Target Compliance - Tighter Grid Gap */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-3 flex-1 overflow-hidden">
+      {/* Latency Allocation Breakdown & Target Compliance */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 flex-1 overflow-hidden my-auto">
         {/* Stage Latency Allocation */}
         <div className="lg:col-span-8 bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-4 sm:p-5 shadow-[4px_5px_0px_#003622] text-[#00140B] flex flex-col justify-between">
           <div>
@@ -71,7 +71,7 @@ export const AnalyticsPage: React.FC = memo(() => {
               </span>
             </div>
 
-            <div className="space-y-2 sm:space-y-3 my-2">
+            <div className="space-y-2.5 sm:space-y-3.5 my-2">
               {pipelineBreakdown.map((stage) => (
                 <div key={stage.name} className="space-y-1">
                   <div className="flex justify-between font-mono text-xs sm:text-sm font-black text-[#00140B]">
@@ -107,7 +107,7 @@ export const AnalyticsPage: React.FC = memo(() => {
               </h2>
             </div>
 
-            <div className="space-y-2 font-sans text-xs">
+            <div className="space-y-2.5 font-sans text-xs">
               <div className="flex items-start space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-[#79C968] shrink-0 mt-0.5" />
                 <span className="font-bold text-[#FFFDF5]">{t('judgeItem1')}</span>

@@ -29,7 +29,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ historyList, onSelectQ
   });
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10 pb-24 lg:pb-8">
+    <div className="w-full max-w-full px-2 sm:px-4 lg:px-5 py-6 sm:py-8 relative z-10 pb-24 lg:pb-8">
       {/* Header Title */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8 pb-4 border-b-2 border-[#006B3C]">
         <div>

@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { Zap } from 'lucide-react';
 import { LanguageSelector } from './LanguageSelector';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -9,7 +8,7 @@ interface HeaderProps {
   onNavigateSystem: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = memo(({ demoMode, onToggleDemo, onNavigateSystem }) => {
+export const Header: React.FC<HeaderProps> = memo(({ onNavigateSystem }) => {
   const { t } = useLanguage();
 
   return (
@@ -58,20 +57,6 @@ export const Header: React.FC<HeaderProps> = memo(({ demoMode, onToggleDemo, onN
             &lt;200ms
           </span>
         </div>
-
-        {/* Demo Mode Toggle Button */}
-        <button
-          onClick={onToggleDemo}
-          className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-bold tracking-wider transition-all flex items-center gap-1.5 border shrink-0 min-h-[36px] cursor-pointer touch-manipulation active:scale-95 ${
-            demoMode 
-              ? 'bg-[#FFD400] text-[#004E32] border-[#003622] shadow-[2px_2px_0px_#003622]' 
-              : 'bg-[#006B3C] text-[#F7F0DB] border-[#79C968]/40 hover:bg-[#004E32]'
-          }`}
-          title="Toggle deterministic Demo Mode for hackathon judging"
-        >
-          <Zap className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${demoMode ? 'fill-[#004E32]' : 'text-[#FFD400]'}`} />
-          <span className="whitespace-nowrap">{demoMode ? t('demoFast') : t('demoMode')}</span>
-        </button>
       </div>
     </header>
   );

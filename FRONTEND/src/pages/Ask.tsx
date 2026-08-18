@@ -84,7 +84,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-20 lg:pb-6 min-h-full flex flex-col justify-start relative z-10 select-none space-y-4">
+    <div className="w-full max-w-full px-2 sm:px-4 lg:px-5 pt-3 sm:pt-4 pb-20 lg:pb-6 min-h-full flex flex-col justify-start relative z-10 select-none space-y-4">
       {/* Main Grid: Centered Microphone Hero Interaction (Col 8) + Side Telemetry (Col 4) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start w-full">
         {/* Central Voice & Input Column (8 Cols) */}

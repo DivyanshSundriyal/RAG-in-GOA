@@ -27,9 +27,9 @@ export const SystemPage: React.FC = memo(() => {
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-3 pb-20 lg:pb-3 min-h-[calc(100vh-65px)] lg:h-[calc(100vh-75px)] flex flex-col justify-start overflow-y-auto lg:overflow-hidden relative z-10 select-none space-y-3">
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 pb-20 lg:pb-3 min-h-[calc(100vh-65px)] lg:h-[calc(100vh-75px)] flex flex-col justify-start overflow-y-auto lg:overflow-hidden relative z-10 select-none space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b-2 border-[#006B3C] shrink-0 pt-1 sm:pt-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-[#006B3C] shrink-0 pt-1 sm:pt-0">
         <div className="flex items-center space-x-3">
           <Cpu className="w-7 h-7 text-[#FFD400]" />
           <div>
@@ -53,14 +53,14 @@ export const SystemPage: React.FC = memo(() => {
         </button>
       </div>
 
-      {/* System Nodes Grid - Tightened Grid Spacing & Clean Padding */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 flex-1 overflow-hidden">
+      {/* System Nodes Grid - Proportional Structuring */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 flex-1 overflow-hidden my-auto">
         {systemNodes.map((node) => {
           const Icon = node.icon;
           return (
             <div
               key={node.title}
-              className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-4 shadow-[4px_5px_0px_#003622] text-[#00140B] flex flex-col justify-between"
+              className="bg-[#F7F0DB] border-3 border-[#003622] rounded-2xl p-4 sm:p-5 shadow-[4px_5px_0px_#003622] text-[#00140B] flex flex-col justify-between h-full min-h-[140px] hover:translate-y-[-2px] transition-transform"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -75,7 +75,7 @@ export const SystemPage: React.FC = memo(() => {
                   </span>
                 </div>
 
-                <p className="font-sans text-xs font-extrabold text-[#00140B] leading-relaxed my-1">
+                <p className="font-sans text-xs font-extrabold text-[#00140B] leading-relaxed my-2">
                   {node.detail}
                 </p>
               </div>
