@@ -11,7 +11,12 @@ interface UseVoiceReturn {
   volume: number;
   micPermissionDenied: boolean;
   startListening: () => void;
-  stopListening: (langCode?: string) => Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }>;
+  stopListening: (langCode?: string) => Promise<{
+    text: string;
+    latencyMs: number;
+    detectedLanguage?: SupportedLanguage;
+    rawLanguageCode?: string;
+  }>;
   resetTranscript: () => void;
   speakAnswer: (text: string) => void;
 }
@@ -232,7 +237,12 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
     });
   }, []);
 
-  const stopListening = useCallback(async (langCode: string = 'unknown'): Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }> => {
+  const stopListening = useCallback(async (langCode: string = 'unknown'): Promise<{
+    text: string;
+    latencyMs: number;
+    detectedLanguage?: SupportedLanguage;
+    rawLanguageCode?: string;
+  }> => {
     setIsListening(false);
     listeningActiveRef.current = false;
 
@@ -248,6 +258,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
     let finalResult = transcript.trim();
     let sttLatencyMs = 0;
     let detectedLang: SupportedLanguage | undefined = detectLanguageFromScript(finalResult);
+    let rawLanguageCode: string | undefined;
 
     try {
       const audioBlob = await stopAudioCapture();
@@ -260,6 +271,7 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
           setTranscript(finalResult);
           sttLatencyMs = sttResponse.latencyMs;
           detectedLang = sttResponse.detectedLanguage || detectLanguageFromScript(finalResult);
+          rawLanguageCode = sttResponse.rawLanguageCode || undefined;
         }
       }
     } catch (e) {
@@ -269,7 +281,12 @@ export function useVoice(_onSpeechComplete?: (finalText: string) => void): UseVo
       setIsTranscribing(false);
     }
 
-    return { text: finalResult, latencyMs: sttLatencyMs, detectedLanguage: detectedLang };
+    return {
+      text: finalResult,
+      latencyMs: sttLatencyMs,
+      detectedLanguage: detectedLang,
+      rawLanguageCode,
+    };
   }, [stopVolumeAnalyzer, stopAudioCapture, transcript]);
 
   const resetTranscript = useCallback(() => {

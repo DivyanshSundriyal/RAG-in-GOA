@@ -23,7 +23,10 @@ export const RecentQueryCard: React.FC<RecentQueryCardProps> = memo(({ response,
         </div>
 
         <span className="bg-[#003622] text-[#FFD400] font-mono text-[10px] font-black px-2 py-0.5 rounded-full">
-          {response.performance.totalMs}ms
+          {(response.performance.guardrailMs || 0) +
+            (response.performance.embeddingMs || 0) +
+            (response.performance.retrievalMs || 0)}
+          ms
         </span>
       </div>
 

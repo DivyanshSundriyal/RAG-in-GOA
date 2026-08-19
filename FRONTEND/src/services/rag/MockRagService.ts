@@ -16,7 +16,7 @@ export class MockRagService implements RagService {
     return new Promise(resolve => setTimeout(resolve, Math.max(50, ms * this.mockLatencyMultipler)));
   }
 
-  async query(input: string, options?: { isVoice?: boolean; demoMode?: boolean }): Promise<RagQueryResponse> {
+  async query(input: string, options?: import('../../types/rag').RagQueryOptions): Promise<RagQueryResponse> {
     const isDemo = options?.demoMode || false;
     const speedFactor = isDemo ? 0.3 : 1.0;
 
@@ -51,7 +51,16 @@ export class MockRagService implements RagService {
       matchedResponse = { ...MOCK_RESPONSES.key_insights };
     } else if (cleanInput.includes('compare') || cleanInput.includes('related')) {
       matchedResponse = { ...MOCK_RESPONSES.compare_docs };
-    } else if (cleanInput.includes('password') || cleanInput.includes('secret') || cleanInput.includes('bank')) {
+    } else if (
+      cleanInput.includes('password') ||
+      cleanInput.includes('secret') ||
+      cleanInput.includes('jailbreak') ||
+      cleanInput.includes('ignore previous') ||
+      cleanInput.includes('system prompt') ||
+      cleanInput.includes('@example.com') ||
+      cleanInput.includes('ssn') ||
+      cleanInput.includes('123-45-6789')
+    ) {
       matchedResponse = { ...MOCK_RESPONSES.unsafe_query };
     } else if (cleanInput.includes('fifa') || cleanInput.includes('world cup') || cleanInput.includes('football')) {
       matchedResponse = { ...MOCK_RESPONSES.off_topic };
@@ -113,6 +122,7 @@ export class MockRagService implements RagService {
 
     // Always preserve raw spoken user query on UI card display
     matchedResponse.query = rawInput;
+    matchedResponse.englishQuery = englishQuery;
     matchedResponse.transcription.text = rawInput;
 
     await this.delay(100 * speedFactor);

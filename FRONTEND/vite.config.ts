@@ -36,6 +36,11 @@ export default defineConfig({
         secure: true,
         rewrite: (path) => path.replace(/^\/api\/sarvam/, ''),
       },
+      '/api/rag': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/rag/, ''),
+      },
     },
   },
 });

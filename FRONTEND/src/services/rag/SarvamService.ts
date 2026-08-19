@@ -5,7 +5,9 @@ export interface SarvamSttResult {
   confidence: number;
   latencyMs: number;
   modelUsed: string;
+  /** Mapped UI language when recognizable */
   detectedLanguage?: SupportedLanguage;
+  /** Raw Sarvam language_code (e.g. hi-IN) — preferred for backend language tag */
   rawLanguageCode?: string;
 }
 
@@ -27,6 +29,54 @@ export const detectLanguageFromScript = (text: string): SupportedLanguage => {
     return 'hi';
   }
   return 'en';
+};
+
+/** Detect romanized (Latin-script) Indian-language queries that script detection misses. */
+export const detectRomanizedLanguage = (text: string): SupportedLanguage | null => {
+  const t = text.toLowerCase();
+  if (!t.trim() || /[\u0900-\u097F\u0A00-\u0A7F\u0C80-\u0CFF]/.test(text)) {
+    return null;
+  }
+
+  const hindiCues =
+    /\b(aaj|kal|kya|kyun|kyon|hai|hain|hoon|hota|hote|hoti|konse|kaun|kaunsa|kaunsi|sabse|bada|badi|bade|chhota|rang|asmaan|ashman|aasmaan|kahan|kahaan|kaise|mujhe|aap|nahi|nahin|batao|bataao|namaste|dhanyavad|kitna|kitne|wala|wali|desert|color|colour)\b/;
+  const marathiCues = /\b(ahe|aahot|kay|kasa|kashi|maza|mazi|tumhi|namaskar|sang|sangaa)\b/;
+  const punjabiCues = /\b(ki|hai|haan|tusi|mainu|kiwen|kithe|dass|sat\s?sri\s?akal)\b/;
+
+  if (hindiCues.test(t)) return 'hi';
+  if (marathiCues.test(t)) return 'mr';
+  if (punjabiCues.test(t)) return 'pa';
+  return null;
+};
+
+/**
+ * Resolve the native language tag for the backend bilingual answer.
+ * Based on the QUERY / Sarvam STT only — never on the global UI language selector.
+ */
+export const resolveNativeLanguage = (opts: {
+  text: string;
+  sarvamLanguageCode?: string;
+  sarvamDetected?: SupportedLanguage;
+}): string => {
+  const raw = (opts.sarvamLanguageCode || '').trim().toLowerCase();
+  if (raw && !raw.startsWith('en') && raw !== 'unknown') {
+    return raw; // e.g. hi-IN
+  }
+  if (opts.sarvamDetected && opts.sarvamDetected !== 'en') {
+    return opts.sarvamDetected;
+  }
+  const fromScript = detectLanguageFromScript(opts.text);
+  if (fromScript !== 'en') return fromScript;
+
+  const romanized = detectRomanizedLanguage(opts.text);
+  if (romanized) return romanized;
+
+  return 'en';
+};
+
+export const isEnglishLanguageTag = (lang: string | undefined | null): boolean => {
+  if (!lang) return true;
+  return lang.toLowerCase().replace('_', '-').split('-')[0] === 'en';
 };
 
 export class SarvamService {
@@ -53,10 +103,17 @@ export class SarvamService {
   }
 
   /**
-   * Send text to Sarvam AI Translation API (mayura:v1) with valid BCP-47 language codes
+   * Translate via Sarvam Mayura. For romanized Indic text, prefer source_language_code=auto.
    */
   async translateText(text: string, targetLangCode: string = 'en-IN', sourceLangCode?: string): Promise<string | null> {
-    if (!this.hasApiKey || !text.trim()) return null;
+    if (!this.hasApiKey || !text.trim()) {
+      if (!this.hasApiKey) {
+        console.warn(
+          '⚠️ Sarvam translate skipped: VITE_SARVAM_API_KEY is missing. Add it to FRONTEND/.env.local and restart Vite.',
+        );
+      }
+      return null;
+    }
 
     const langMap: Record<string, string> = {
       en: 'en-IN',
@@ -65,25 +122,58 @@ export class SarvamService {
       gom: 'mr-IN',
       kn: 'kn-IN',
       pa: 'pa-IN',
+      pn: 'pa-IN',
     };
 
-    let target = langMap[targetLangCode] || targetLangCode;
-    if (!target.includes('-')) target = `${target}-IN`;
+    const toBcp47 = (code: string | undefined, fallback: string): string => {
+      if (!code) return fallback;
+      const trimmed = code.trim();
+      if (trimmed.toLowerCase() === 'auto') return 'auto';
+      if (trimmed.includes('-')) return trimmed.replace('_', '-');
+      const base = trimmed.toLowerCase().split(/[-_]/)[0];
+      return langMap[base] || `${base}-IN`;
+    };
 
-    let source = sourceLangCode ? (langMap[sourceLangCode] || sourceLangCode) : undefined;
-    if (!source) {
+    const target = toBcp47(targetLangCode, 'en-IN');
+    const isLatinOnly = /^[\x00-\x7F]*$/.test(text) && /[a-zA-Z]/.test(text);
+    const hasIndicScript = /[\u0900-\u097F\u0A00-\u0A7F\u0C80-\u0CFF]/.test(text);
+
+    // Romanized Hindi/Punjabi/Marathi: Mayura handles this best with source=auto
+    let source: string;
+    if (isLatinOnly && !hasIndicScript && target.startsWith('en')) {
+      source = 'auto';
+    } else if (sourceLangCode) {
+      source = toBcp47(sourceLangCode, 'auto');
+    } else {
       const detectedScript = detectLanguageFromScript(text);
-      source = langMap[detectedScript] || 'hi-IN';
+      const romanized = detectRomanizedLanguage(text);
+      source = toBcp47(romanized || detectedScript, 'auto');
+      if (source.startsWith('en') && romanized) {
+        source = 'auto';
+      }
     }
-    if (!source.includes('-')) source = `${source}-IN`;
 
-    // Same language guard
-    if (source === target) return text;
+    if (source === target) {
+      // Still try auto→en for romanized that was mis-tagged as English
+      if (!(isLatinOnly && detectRomanizedLanguage(text))) {
+        return text;
+      }
+      source = 'auto';
+    }
 
     const endpoints = [
       'https://api.sarvam.ai/translate',
       '/api/sarvam/translate',
     ];
+
+    const bodyBase = {
+      input: text,
+      source_language_code: source,
+      target_language_code: target,
+      speaker_gender: 'Female',
+      mode: 'formal',
+      model: 'mayura:v1',
+    };
 
     for (const endpointUrl of endpoints) {
       try {
@@ -93,20 +183,15 @@ export class SarvamService {
             'Content-Type': 'application/json',
             'api-subscription-key': this.apiKey,
           },
-          body: JSON.stringify({
-            input: text,
-            source_language_code: source,
-            target_language_code: target,
-            speaker_gender: 'Female',
-            mode: 'formal',
-            model: 'mayura:v1',
-          }),
+          body: JSON.stringify(bodyBase),
         });
 
         if (res.ok) {
           const data = await res.json();
-          if (data.translated_text) {
-            return data.translated_text;
+          const out = (data.translated_text || '').trim();
+          if (out) {
+            console.log(`✅ Sarvam translate (${source} → ${target}): "${text}" → "${out}"`);
+            return out;
           }
         } else {
           const errBody = await res.text();
@@ -114,6 +199,31 @@ export class SarvamService {
         }
       } catch (e) {
         console.warn(`❌ Sarvam Translate network error via ${endpointUrl}:`, e);
+      }
+    }
+
+    // Fallback: explicit hi-IN if auto failed
+    if (source === 'auto') {
+      try {
+        const res = await fetch('https://api.sarvam.ai/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-subscription-key': this.apiKey,
+          },
+          body: JSON.stringify({
+            ...bodyBase,
+            source_language_code: 'hi-IN',
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.translated_text?.trim()) {
+            return data.translated_text.trim();
+          }
+        }
+      } catch {
+        // ignore
       }
     }
 

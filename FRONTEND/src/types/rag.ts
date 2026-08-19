@@ -1,19 +1,19 @@
-export type PipelineState = 
-  | 'IDLE' 
-  | 'LISTENING' 
-  | 'TRANSCRIBING' 
-  | 'RETRIEVING' 
-  | 'GENERATING' 
-  | 'SUCCESS' 
-  | 'REJECTED' 
+export type PipelineState =
+  | 'IDLE'
+  | 'LISTENING'
+  | 'TRANSCRIBING'
+  | 'RETRIEVING'
+  | 'GENERATING'
+  | 'SUCCESS'
+  | 'REJECTED'
   | 'ERROR';
 
-export type GuardrailStatus = 
-  | 'allowed' 
-  | 'off_topic' 
-  | 'unsafe' 
-  | 'no_context' 
-  | 'low_confidence' 
+export type GuardrailStatus =
+  | 'allowed'
+  | 'off_topic'
+  | 'unsafe'
+  | 'no_context'
+  | 'low_confidence'
   | 'backend_failure';
 
 export interface Transcription {
@@ -27,6 +27,8 @@ export interface Answer {
   confidence: number;
   grounded: boolean;
   summary?: string;
+  english?: string;
+  native?: string;
 }
 
 export interface EvidenceSource {
@@ -46,13 +48,19 @@ export interface RetrievalResult {
 
 export interface PerformanceMetrics {
   transcriptionMs: number;
+  /** Sarvam mayura translate latency (query → English for retrieval) */
+  translationMs?: number;
   retrievalMs: number;
   generationMs: number;
   guardrailMs: number;
   totalMs: number;
-  p50: number;
-  p70: number;
-  p100: number;
+  embeddingMs?: number;
+  /** @deprecated Removed from active UI; kept optional for mock compatibility */
+  p50?: number;
+  /** @deprecated Removed from active UI; kept optional for mock compatibility */
+  p70?: number;
+  /** @deprecated Removed from active UI; kept optional for mock compatibility */
+  p100?: number;
 }
 
 export interface GuardrailResult {
@@ -61,10 +69,21 @@ export interface GuardrailResult {
   suggestedAction?: string;
 }
 
+export interface RagQueryOptions {
+  isVoice?: boolean;
+  demoMode?: boolean;
+  sttLatencyMs?: number;
+  language?: string;
+  rawLanguageCode?: string;
+}
+
 export interface RagQueryResponse {
   id: string;
   timestamp: string;
+  /** Original user transcript / typed text */
   query: string;
+  /** Sarvam-translated English used for retrieval (shown under the question) */
+  englishQuery?: string;
   transcription: Transcription;
   answer: Answer;
   retrieval: RetrievalResult;

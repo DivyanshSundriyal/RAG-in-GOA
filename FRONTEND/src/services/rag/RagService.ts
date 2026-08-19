@@ -1,10 +1,10 @@
-import type { RagQueryResponse } from '../../types/rag';
+import type { RagQueryOptions, RagQueryResponse } from '../../types/rag';
 
 export interface RagService {
   /**
    * Execute full RAG pipeline (Voice or Typed query)
    */
-  query(input: string, options?: { isVoice?: boolean; demoMode?: boolean }): Promise<RagQueryResponse>;
+  query(input: string, options?: RagQueryOptions): Promise<RagQueryResponse>;
 
   /**
    * Transcribe voice audio buffer or speech string
@@ -24,5 +24,11 @@ export interface RagService {
   /**
    * Check system health and service status
    */
-  healthCheck(): Promise<{ voiceOnline: boolean; ragReady: boolean; vectorDbConnected: boolean; modelReady: boolean; latencyMs: number }>;
+  healthCheck(): Promise<{
+    voiceOnline: boolean;
+    ragReady: boolean;
+    vectorDbConnected: boolean;
+    modelReady: boolean;
+    latencyMs: number;
+  }>;
 }

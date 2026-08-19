@@ -9,11 +9,11 @@ import { RetrievedEvidence } from '../components/evidence/RetrievedEvidence';
 import { PipelineMetricsCard } from '../components/latency/PipelineMetricsCard';
 import { RecentQueryCard } from '../components/recent/RecentQueryCard';
 import { GuardrailBanner } from '../components/guardrails/GuardrailBanner';
-import type { PipelineState, RagQueryResponse } from '../types/rag';
+import type { PipelineState, RagQueryOptions, RagQueryResponse } from '../types/rag';
 import { getLocalizedMockResponses } from '../data/mockQueries';
 import { useLanguage } from '../context/LanguageContext';
 import type { SupportedLanguage } from '../data/translations';
-import { detectLanguageFromScript } from '../services/rag/SarvamService';
+import { resolveNativeLanguage } from '../services/rag/SarvamService';
 
 interface AskPageProps {
   pipelineState: PipelineState;
@@ -27,8 +27,13 @@ interface AskPageProps {
   micDenied: boolean;
   demoMode: boolean;
   onStartListen: () => void;
-  onStopListen: (langCode?: string) => Promise<{ text: string; latencyMs: number; detectedLanguage?: SupportedLanguage }>;
-  onSubmitQuery: (text: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => void;
+  onStopListen: (langCode?: string) => Promise<{
+    text: string;
+    latencyMs: number;
+    detectedLanguage?: SupportedLanguage;
+    rawLanguageCode?: string;
+  }>;
+  onSubmitQuery: (text: string, options?: RagQueryOptions) => void;
   onResetPipeline: () => void;
   onRestoreFromHistory: (resp: RagQueryResponse) => void;
 }
@@ -49,38 +54,61 @@ export const AskPage: React.FC<AskPageProps> = memo(({
   onResetPipeline,
   onRestoreFromHistory,
 }) => {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const isBusy: boolean = pipelineState === 'TRANSCRIBING' || pipelineState === 'RETRIEVING' || pipelineState === 'GENERATING' || Boolean(isTranscribing);
   const showResult = pipelineState === 'SUCCESS' && currentResponse;
   const showGuardrail = pipelineState === 'REJECTED' && currentResponse;
 
   const localizedMocks = getLocalizedMockResponses(t);
   const displayRecent = historyList[0] || localizedMocks.main_findings;
+  const emptyMetrics = {
+    transcriptionMs: 0,
+    translationMs: 0,
+    retrievalMs: 0,
+    generationMs: 0,
+    guardrailMs: 0,
+    totalMs: 0,
+    embeddingMs: 0,
+  };
 
   const handleSendVoiceQuery = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    // Wait for Sarvam STT to finish — do not call RAG while recording
     const sttResponse = await onStopListen('unknown');
     const queryToSend = (sttResponse.text || transcript).trim();
-    
-    // STRICT CHECK: Never submit empty fallback queries automatically
+
     if (!queryToSend) {
       return;
     }
-    
-    const detected = sttResponse.detectedLanguage || detectLanguageFromScript(queryToSend);
-    if (detected && detected !== language) {
-      setLanguage(detected);
-    }
 
-    onSubmitQuery(queryToSend, { isVoice: true, sttLatencyMs: sttResponse.latencyMs });
+    // Detect language from speech/transcript for the backend tag only.
+    // Do NOT change the global UI language selector.
+    const replyLanguage = resolveNativeLanguage({
+      text: queryToSend,
+      sarvamLanguageCode: sttResponse.rawLanguageCode,
+      sarvamDetected: sttResponse.detectedLanguage,
+    });
+
+    onSubmitQuery(queryToSend, {
+      isVoice: true,
+      sttLatencyMs: sttResponse.latencyMs,
+      language: replyLanguage,
+      rawLanguageCode: sttResponse.rawLanguageCode || replyLanguage,
+    });
   };
 
-  const handleTypedSubmitWithAutoLang = (queryText: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => {
-    const detected = detectLanguageFromScript(queryText);
-    if (detected && detected !== language) {
-      setLanguage(detected);
-    }
-    onSubmitQuery(queryText, options);
+  const handleTypedSubmitWithAutoLang = (queryText: string, options?: RagQueryOptions) => {
+    // Detect language from the typed query for the backend tag only.
+    // Keep the global page language unchanged (e.g. stay on English).
+    const replyLanguage = resolveNativeLanguage({
+      text: queryText,
+    });
+
+    onSubmitQuery(queryText, {
+      ...options,
+      language: options?.language || replyLanguage,
+      rawLanguageCode: options?.rawLanguageCode || replyLanguage,
+    });
   };
 
   return (
@@ -233,7 +261,12 @@ export const AskPage: React.FC<AskPageProps> = memo(({
                   </motion.div>
                 ) : (
                   /* Typed Input Fallback & Quick Suggestion Chips */
-                  <TypedInput onSubmitQuery={(q) => handleTypedSubmitWithAutoLang(q, { isVoice: false })} isBusy={isBusy} />
+                  <TypedInput
+                    onSubmitQuery={(q) =>
+                      handleTypedSubmitWithAutoLang(q, { isVoice: false })
+                    }
+                    isBusy={isBusy}
+                  />
                 )}
               </motion.div>
             ) : showGuardrail && currentResponse ? (
@@ -299,9 +332,7 @@ export const AskPage: React.FC<AskPageProps> = memo(({
 
           {/* Pipeline Latency Performance Panel */}
           <PipelineMetricsCard 
-            metrics={
-              currentResponse?.performance || localizedMocks.main_findings.performance
-            } 
+            metrics={currentResponse?.performance || emptyMetrics} 
           />
         </div>
       </div>

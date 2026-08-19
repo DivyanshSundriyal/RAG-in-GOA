@@ -30,7 +30,7 @@ export const GuardrailBanner: React.FC<GuardrailBannerProps> = memo(({ guardrail
           subtitle: 'This safety policy prevented execution for this request.',
           icon: Lock,
           badgeColor: 'bg-[#FF0B78] text-[#FFFDF5]',
-          defaultAction: 'Avoid asking for passwords, private credentials, or unsafe topics.'
+          defaultAction: 'Do not include banned words, passwords, emails, phone numbers, or personal IDs.'
         };
       case 'no_context':
         return {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/brand/Header';
 import { Sidebar, type NavTab } from './components/navigation/Sidebar';
 import { GoaBackground } from './components/illustrations/GoaBackground';
@@ -8,7 +8,7 @@ import { AnalyticsPage } from './pages/Analytics';
 import { SystemPage } from './pages/System';
 import { usePipeline } from './hooks/usePipeline';
 import { useVoice } from './hooks/useVoice';
-import type { RagQueryResponse } from './types/rag';
+import type { RagQueryOptions, RagQueryResponse } from './types/rag';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('ask');
@@ -30,12 +30,6 @@ export function App() {
     restoreFromHistory,
   } = usePipeline(demoMode);
 
-  const handleSpeechComplete = useCallback((finalText: string) => {
-    if (finalText.trim()) {
-      runPipeline(finalText, { isVoice: true, demoMode });
-    }
-  }, [runPipeline, demoMode]);
-
   const {
     isListening,
     isTranscribing,
@@ -45,7 +39,7 @@ export function App() {
     micPermissionDenied,
     startListening,
     stopListening,
-  } = useVoice(handleSpeechComplete);
+  } = useVoice();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -74,8 +68,13 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTab, isListening, startListening, stopListening, resetPipeline]);
 
-  const handleTypedSubmit = (text: string, options?: { isVoice?: boolean; sttLatencyMs?: number }) => {
-    runPipeline(text, { isVoice: options?.isVoice ?? false, demoMode, sttLatencyMs: options?.sttLatencyMs });
+  const handleTypedSubmit = (text: string, options?: RagQueryOptions) => {
+    runPipeline(text, {
+      ...options,
+      isVoice: options?.isVoice ?? false,
+      demoMode,
+      sttLatencyMs: options?.sttLatencyMs,
+    });
   };
 
   const handleSelectHistoryItem = (resp: RagQueryResponse) => {
@@ -129,7 +128,7 @@ export function App() {
             />
           )}
 
-          {activeTab === 'analytics' && <AnalyticsPage />}
+          {activeTab === 'analytics' && <AnalyticsPage historyList={historyList} />}
 
           {activeTab === 'system' && <SystemPage />}
         </main>
